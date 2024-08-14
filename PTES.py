@@ -19,7 +19,7 @@ from oemof.solph import processing
 from oemof.solph import views
 
 data = pd.read_csv("basic_example.csv")
-grid_costs = pd.read_csv("grid_costs.csv", skiprows=2)
+grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2)
 grid_costs[grid_costs["Preis (EUR/kWh)"] <= 0] = 0
 
 year_index = create_time_index(year=2023, number=len(data))

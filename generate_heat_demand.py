@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 
 import demandlib.bdew as bdew
-
-def gen_heat_demand(df_temp, ):
+import matplotlib.pyplot as plt
+def gen_heat_demand(df_temp):
 
     #anzahl_MFH = 35 # 15 WE pro MFH = 525 WE
     #beh_wohnfl_proMFH = 1091.9 # m2
@@ -40,7 +40,12 @@ def gen_heat_demand(df_temp, ):
         annual_heat_demand=5082794.5, # kWh/a
         name="MFH",
     ).get_bdew_profile()
-    
-    
-    
+
+    # Plot demand of building
+    ax = demand.plot()
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Heat demand in kW")
+    plt.show()
+    #Save Plot
+    plt.savefig("results/demand_data.png", dpi=300)
     return demand

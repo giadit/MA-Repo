@@ -19,11 +19,11 @@ from oemof.solph import processing
 from oemof.solph import views
 
 data = pd.read_csv("basic_example.csv")
-grid_costs = pd.read_csv("grid_costs.csv", skiprows=2)
+grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2)
 grid_costs[grid_costs["Preis (EUR/kWh)"] <= 0] = 0
 
 
-year_index = create_time_index(year=2022, number=len(data))
+year_index = create_time_index(year=2023, number=len(data))
 energysys = solph.EnergySystem(timeindex=year_index, infer_last_interval=False)
 
 
@@ -101,7 +101,7 @@ plt.legend(
     ncol=2,
 )
 fig.subplots_adjust(top=0.8)
-plt.savefig("storage_SOC.png", dpi=300)
+plt.savefig("results/storage_SOC.png", dpi=300)
 plt.show()
 
 fig, ax = plt.subplots(figsize=(10, 5))
@@ -115,7 +115,7 @@ plt.legend(
     ncol=2,
 )
 fig.subplots_adjust(top=0.8)
-plt.savefig("storage_data.png", dpi=300)
+plt.savefig("results/storage_data.png", dpi=300)
 plt.show()
 
 
@@ -128,7 +128,7 @@ plt.legend(
     loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.3), ncol=2
 )
 fig.subplots_adjust(top=0.8)
-plt.savefig("demand_data.png", dpi=300)
+plt.savefig("results/demand_data.png", dpi=300)
 plt.show()
 
 #plot electricity from grid & PV
@@ -140,7 +140,7 @@ plt.legend(
     loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.3), ncol=2
 )
 fig.subplots_adjust(top=0.8)
-plt.savefig("grid_pv_data.png", dpi=300)
+plt.savefig("results/grid_pv_data.png", dpi=300)
 plt.show()
 
 
@@ -153,6 +153,6 @@ plt.legend(
     loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.3), ncol=2
 )
 fig.subplots_adjust(top=0.8)
-plt.savefig("excess_data.png", dpi=300)
+plt.savefig("results/excess_data.png", dpi=300)
 plt.show()
 
