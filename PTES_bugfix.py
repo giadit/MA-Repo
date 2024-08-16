@@ -18,7 +18,9 @@ from oemof.solph import helpers
 from oemof.solph import processing
 from oemof.solph import views
 
-data = pd.read_csv("basic_example.csv")
+
+#data = pd.read_csv("basic_example.csv")
+
 grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2)
 grid_costs[grid_costs["Preis (EUR/kWh)"] <= 0] = 0
 
