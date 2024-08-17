@@ -19,7 +19,6 @@ def process_results(results):
     custom_storage = views.node(results, "storage")
     thermal_bus = views.node(results, "th. Energy ORC")
     electricity_bus = views.node(results, "electricity")
-    print(thermal_bus)
 
     # save to csv
     custom_storage["sequences"].to_csv("results/storage_data.csv")
