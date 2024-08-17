@@ -60,7 +60,7 @@ def gen_heat_demand(df_temp):
         year, 1, 1, 0), periods=8760, freq="h"))
 
     #Generate demand for building types
-    demand["MFH_th"] = bdew.HeatBuilding(
+    demand["MFH"] = bdew.HeatBuilding(
         demand.index,
         holidays=holidays,
         temperature=df_temp,
@@ -68,7 +68,7 @@ def gen_heat_demand(df_temp):
         building_class=3,
         wind_class=0,
         annual_heat_demand=annual_heat_demand["MFH"], # kWh/a
-        name="MFH",
+        name="mfh",
     ).get_bdew_profile()
 
     # read standard load profiles
@@ -80,25 +80,25 @@ def gen_heat_demand(df_temp):
     # Resample 15-minute values to hourly values.
     elec_demand_resampled = elec_demand.resample("h").mean()
     print(elec_demand_resampled.sum())
-    demand["el_demand"] = elec_demand_resampled
+    demand["demand_el"] = elec_demand_resampled
 
-    # Plot demand of building
-    ax = demand["MFH_th"].plot()
-    ax.set_ylabel("Heat demand in kW")
-    plt.savefig("results/heat_demand_data.png",dpi=1200)
-    plt.show()
-
-    plt.clf()
-
-    # Plot demand
-    ax = elec_demand_resampled.plot()
-    ax.set_ylabel("Power demand")
-    plt.savefig("results/el_demand_data.png",dpi=1200)
-    plt.show()
+   ## Plot demand of building
+   #ax = demand["MFH"].plot()
+   #ax.set_ylabel("Heat demand in kW")
+   #plt.savefig("results/heat_demand_data.png",dpi=1200)
+   #plt.show()
+   #
+   #plt.clf()
+   #
+   ## Plot demand
+   #ax = elec_demand_resampled.plot()
+   #ax.set_ylabel("Power demand")
+   #plt.savefig("results/el_demand_data.png",dpi=1200)
+   #plt.show()
 
     return demand
 
 df = read_data(TRY=True)
 df_temp = df["Temperature [°C]"]
 demand = gen_heat_demand(df_temp)
-print(demand["el_demand"])
+print(demand["demand_el"])

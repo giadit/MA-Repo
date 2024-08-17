@@ -12,17 +12,28 @@ from oemof.solph import helpers
 from oemof.solph import processing
 from oemof.solph import views
 
+from oemof_visio import plot
+from oemof_visio.energy_system_graph import ESGraphRenderer
 
-#data = pd.read_csv("basic_example.csv")
 
+from generate_demand import read_data, gen_heat_demand
+
+#to be removed later, now for PV and Wind
+data = pd.read_csv("basic_example.csv")
+
+df = read_data(TRY=True)
+df_temp = df["Temperature [°C]"]
+# th and el demand
+demand = gen_heat_demand(df_temp)
+#el prices
 grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2)
+#Remove negative costs as they cant be processed
 grid_costs[grid_costs["Preis (EUR/kWh)"] <= 0] = 0
-
 
 year_index = create_time_index(year=2023, number=len(data))
 energysys = solph.EnergySystem(timeindex=year_index, infer_last_interval=False)
 
-
+#generate buses
 th1 = buses.Bus(label="th. Energy HP")
 th2 = buses.Bus(label="th. Energy ORC")
 bel = buses.Bus(label="electricity")
@@ -33,16 +44,21 @@ energysys.add(
     cmp.Sink(
         label="excess_bel",
         inputs={bel: flows.Flow()}))
-#adding demand
+#adding el demand
 energysys.add(
         cmp.Sink(
         label="demand_el",
-        inputs={bel: flows.Flow(fix= data["demand_el"], nominal_value = 1)}))
+        inputs={bel: flows.Flow(fix= demand["demand_el"], nominal_value = 1)}))
+#adding th demand
+energysys.add(
+        cmp.Sink(
+        label="demand_th",
+        inputs={th2: flows.Flow(fix= demand["MFH"], nominal_value = 1)}))
 #create grid
 energysys.add(
     cmp.Source(
         label="grid",
-        outputs={bel: flows.Flow(variable_costs=10)}))
+        outputs={bel: flows.Flow(variable_costs=grid_costs["Preis (EUR/kWh)"])}))
 #fixed source for pv
 energysys.add(
     cmp.Source(
@@ -70,8 +86,11 @@ energysys.add(cmp.Converter(
         inputs={th2: flows.Flow()},
         outputs={bel: flows.Flow()},
         conversion_factors={bel: 0.15}))
+#oemof-visio
+gr = ESGraphRenderer(energy_system=energysys, filepath="results/energy_system", img_format="png")
+gr.view()
 
-"create optimization"
+#create optimization
 om = solph.Model(energysys)
 om.solve(solver='cbc', solve_kwargs={'tee': True})
 om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
