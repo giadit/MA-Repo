@@ -53,7 +53,7 @@ grid = cmp.Source(
 #fixed source for pv
 pv = cmp.Source(
         label="pv",
-        outputs={bel: flows.Flow(fix=data["pv"], nominal_value=582000)})
+        outputs={bel: flows.Flow(fix=data["pv"], nominal_value=5820)})
 #create convereter (HeatPump)
 HP = cmp.Converter(
         label = "HP",

@@ -79,7 +79,7 @@ def gen_heat_demand(df_temp):
 
     # Resample 15-minute values to hourly values.
     elec_demand_resampled = elec_demand.resample("h").mean()
-    print(elec_demand_resampled.sum())
+
     demand["demand_el"] = elec_demand_resampled
 
    ## Plot demand of building
