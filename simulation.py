@@ -91,9 +91,6 @@ om.solve(solver='cbc', solve_kwargs={'tee': True})
 om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
 energysys.results = processing.results(om)
 results = solph.processing.results(om)
-#oemof visio
-gr = ESGraphRenderer(energy_system=energysys, filepath="results/energy_system", img_format="png")
-gr.view()
 
 # get all variables of a specific component/bus
 custom_storage = views.node(results, "storage")
