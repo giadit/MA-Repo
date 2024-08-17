@@ -37,41 +37,35 @@ energysys = solph.EnergySystem(timeindex=year_index, infer_last_interval=False)
 th1 = buses.Bus(label="th. Energy HP")
 th2 = buses.Bus(label="th. Energy ORC")
 bel = buses.Bus(label="electricity")
-energysys.add(th1,th2,bel)
 
 #excess component for overproduction of el
-energysys.add(
-    cmp.Sink(
+excess_bel = cmp.Sink(
         label="excess_bel",
-        inputs={bel: flows.Flow()}))
+        inputs={bel: flows.Flow()})
 #adding el demand
-energysys.add(
-        cmp.Sink(
+demand_el = cmp.Sink(
         label="demand_el",
-        inputs={bel: flows.Flow(fix= demand["demand_el"], nominal_value = 1)}))
+        inputs={bel: flows.Flow(fix= demand["demand_el"], nominal_value = 1)})
 #adding th demand
-energysys.add(
-        cmp.Sink(
+demand_th = cmp.Sink(
         label="demand_th",
-        inputs={th2: flows.Flow(fix= demand["MFH"], nominal_value = 1)}))
+        inputs={th2: flows.Flow(fix= demand["MFH"], nominal_value = 1)})
 #create grid
-energysys.add(
-    cmp.Source(
+grid = cmp.Source(
         label="grid",
-        outputs={bel: flows.Flow(variable_costs=grid_costs["Preis (EUR/kWh)"])}))
+        outputs={bel: flows.Flow(variable_costs=grid_costs["Preis (EUR/kWh)"])})
 #fixed source for pv
-energysys.add(
-    cmp.Source(
+pv = cmp.Source(
         label="pv",
-        outputs={bel: flows.Flow(fix=data["pv"], nominal_value=582000)}))
+        outputs={bel: flows.Flow(fix=data["pv"], nominal_value=582000)})
 #create convereter (HeatPump)
-energysys.add(cmp.Converter(
+HP = cmp.Converter(
         label = "HP",
         inputs={bel: flows.Flow()},
         outputs={th1: flows.Flow()},
-        conversion_factors={th1: 3}))
+        conversion_factors={th1: 3})
 #create storage system
-energysys.add(cmp.GenericStorage(
+storage = cmp.GenericStorage(
         nominal_storage_capacity=10077997,
         label = "storage",
         inputs = {th1: flows.Flow(nominal_value=1007797/6)},
@@ -79,16 +73,17 @@ energysys.add(cmp.GenericStorage(
         loss_rate = 0.00,
         initial_storage_level = None,
         inflow_conversion_factor=1,
-        outflow_conversion_factor=0.9))
+        outflow_conversion_factor=0.9)
 #create convereter (ORC)
-energysys.add(cmp.Converter(
+ORC = cmp.Converter(
         label = "ORC",
         inputs={th2: flows.Flow()},
         outputs={bel: flows.Flow()},
-        conversion_factors={bel: 0.15}))
-#oemof-visio
-gr = ESGraphRenderer(energy_system=energysys, filepath="results/energy_system", img_format="png")
-gr.view()
+        conversion_factors={bel: 0.15})
+#add nodes to system
+energysys.add(th1,th2,bel,
+              excess_bel,demand_th,demand_el,grid,pv,
+              ORC, HP, storage)
 
 #create optimization
 om = solph.Model(energysys)
@@ -96,6 +91,9 @@ om.solve(solver='cbc', solve_kwargs={'tee': True})
 om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
 energysys.results = processing.results(om)
 results = solph.processing.results(om)
+#oemof visio
+gr = ESGraphRenderer(energy_system=energysys, filepath="results/energy_system", img_format="png")
+gr.view()
 
 # get all variables of a specific component/bus
 custom_storage = views.node(results, "storage")
