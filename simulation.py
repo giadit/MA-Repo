@@ -11,7 +11,7 @@ from oemof.solph import helpers
 from oemof.solph import processing
 from oemof.solph import views
 
-
+from process_results import process_results
 from generate_demand import read_data, gen_heat_demand
 
 #to be removed later, now for PV and Wind
@@ -89,3 +89,5 @@ om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
 #processing results
 energysys.results = processing.results(om)
 results = solph.processing.results(om)
+
+process_results(results)

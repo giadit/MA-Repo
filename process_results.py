@@ -17,50 +17,14 @@ from oemof.solph import views
 def process_results(results):
     # get all variables of a specific component/bus
     custom_storage = views.node(results, "storage")
-    thermal_bus = views.node(results, "th. Energy")
+    thermal_bus = views.node(results, "th. Energy ORC")
     electricity_bus = views.node(results, "electricity")
     print(thermal_bus)
 
-    # Convert to pandas DataFrame
-    electricity_df = pd.DataFrame({
-        'Demand': electricity_bus['sequences'][(('electricity', 'demand_el'), 'flow')],
-        'Excess': electricity_bus['sequences'][(('electricity', 'demand_el'), 'flow')],
-        "ORC": electricity_bus['sequences'][(('ORC', 'electricity'), 'flow')],
-        'HP': electricity_bus['sequences'][(("electricity", 'HP'), 'flow')]
-    })
-    # Set the plot size
-    plt.figure(figsize=(12, 6))
-
-    # Plot the electricity demand
-    plt.plot(electricity_df.index, electricity_df['Demand'], label='Electricity Demand', color='blue')
-
-    # Plot the electricity generation
-    plt.plot(electricity_df.index, electricity_df['Generation'], label='Electricity Generation', color='green')
-
-    # Plot the electricity storage
-    plt.plot(electricity_df.index, electricity_df['Storage'], label='Electricity Storage', color='orange')
-
-    # Add title and labels
-    plt.title('Energy System Results')
-    plt.xlabel('Time')
-    plt.ylabel('Power [MW]')
-
-    # Add legend
-    plt.legend()
-
-    # Rotate x-axis labels for better readability
-    plt.xticks(rotation=45)
-
-    # Add grid
-    plt.grid(True)
-
-    # Show the plot
-    plt.tight_layout()
-    plt.show()
-
     # save to csv
-    custom_storage["sequences"].to_csv("storage_data.csv")
-    electricity_bus["sequences"].to_csv("el_data.csv")
+    custom_storage["sequences"].to_csv("results/storage_data.csv")
+    electricity_bus["sequences"].to_csv("results/el_data.csv")
+    thermal_bus["sequences"].to_csv(("results/th_data.csv"))
     # plot the time series (sequences) of a specific component/bus
     fig, ax = plt.subplots(figsize=(10, 5))
     custom_storage["sequences"].iloc[:, 0].plot(
@@ -126,3 +90,4 @@ def process_results(results):
     plt.savefig("results/excess_data.png", dpi=300)
     plt.show()
 
+    return
