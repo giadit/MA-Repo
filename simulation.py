@@ -1,5 +1,7 @@
 import pandas as pd
 
+import matplotlib.pyplot as plt
+
 import oemof.solph as solph
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -13,6 +15,15 @@ from oemof.solph import views
 
 from process_results import process_results
 from generate_demand import read_data, gen_heat_demand
+# SET PARAMS
+hp_COP = 4.009
+orc_eff = 0.25
+storage_cap = 175000 #kWh
+storage_output = 2900 #kW
+storage_input = 2900 #kW
+storage_eff = 0.98
+storage_loss = 0.002 # 0.2 %/day
+
 
 #to be removed later, now for PV and Wind
 data = pd.read_csv("basic_example.csv")
@@ -21,6 +32,7 @@ df = read_data(TRY=True)
 df_temp = df["Temperature [°C]"]
 # th and el demand
 demand = gen_heat_demand(df_temp)
+demand.to_csv("results/demand.csv")
 #el prices
 grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2)
 #Remove negative costs as they cant be processed
@@ -59,23 +71,23 @@ HP = cmp.Converter(
         label = "HP",
         inputs={bel: flows.Flow()},
         outputs={th1: flows.Flow()},
-        conversion_factors={th1: 3})
+        conversion_factors={th1: hp_COP}) # technikkatalog
 #create storage system
 storage = cmp.GenericStorage(
-        nominal_storage_capacity=10077997,
+        nominal_storage_capacity= storage_cap,
         label = "storage",
-        inputs = {th1: flows.Flow(nominal_value=1007797/6)},
-        outputs = {th2: flows.Flow(nominal_value=1007797/6, variable_costs=0.001)},
-        loss_rate = 0.00,
+        inputs = {th1: flows.Flow(nominal_value= storage_input)},
+        outputs = {th2: flows.Flow(nominal_value= storage_output, variable_costs=0.001)},
+        loss_rate = storage_loss/24,
         initial_storage_level = None,
         inflow_conversion_factor=1,
-        outflow_conversion_factor=0.9)
+        outflow_conversion_factor=storage_eff)
 #create convereter (ORC)
 ORC = cmp.Converter(
         label = "ORC",
         inputs={th2: flows.Flow()},
         outputs={bel: flows.Flow()},
-        conversion_factors={bel: 0.15})
+        conversion_factors={bel: orc_eff})
 #add nodes to system
 energysys.add(th1,th2,bel,
               excess_bel,demand_th,demand_el,grid,pv,

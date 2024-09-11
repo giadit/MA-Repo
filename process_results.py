@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 import oemof.solph as solph
 from oemof.solph import EnergySystem
@@ -41,7 +42,7 @@ def process_results(results):
     plt.ylabel('Power [kW]')
 
     fig.subplots_adjust(top=0.8)
-    plt.savefig("results/storage_SOC.png", dpi=1200)
+    plt.savefig("results/storage_SOC.png", dpi=600)
     plt.show()
 
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -58,18 +59,38 @@ def process_results(results):
     plt.savefig("results/storage_data.png", dpi=300)
     plt.show()
 
-    # plot electricity demand
-    fig, ax = plt.subplots(figsize=(10, 5))
-    electricity_bus["sequences"].iloc[:, 2].plot(
-        ax=ax, kind="line", drawstyle="steps-post")
+     # plot electricity demand
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+     
+    ORC_el = electricity_bus["sequences"].iloc[:, 0]  # Column at index 0 for the first bar
+    grid_el = electricity_bus["sequences"].iloc[:, 4]  # Column at index 4 for the second bar
+    demand_el = electricity_bus["sequences"].iloc[:, 2]  # Column at index 2 for the line plot
+     
+     # Plot the stacked bars
+    bar1 = ax1.bar(electricity_bus["sequences"].index, ORC_el, label='ORC el.', color='yellow', width=2)
+    bar2 = ax1.bar(electricity_bus["sequences"].index, grid_el, bottom=ORC_el, label='Grid el.', color='orange', width=2)
 
-    plt.title('El. Demand')
-    plt.ylabel('Power [kW]')
+     # Plot the line plot
+    ax1.plot(electricity_bus["sequences"].index, demand_el, label='el. Demand', color='lightgreen', marker=None, linewidth=1)
 
-    fig.subplots_adjust(top=0.8)
-    plt.savefig("results/demand_data.png", dpi=1200)
+    ax1.set_ylabel('Power [kW]')
+    ax1.legend()
+
+    # Improve layout
+    # Generate 24 evenly spaced tick positions along the x-axis
+    tick_positions = np.linspace(0, len(electricity_bus["sequences"].index) - 1, 24).astype(int)
+
+    # Set x-axis ticks to the calculated positions
+    ax1.set_xticks(electricity_bus["sequences"].index[tick_positions])
+
+    # Format the tick labels to show the date, rotating for readability
+    ax1.set_xticklabels(electricity_bus["sequences"].index[tick_positions].strftime('%Y-%m-%d'), rotation=45)
+    
+    
+    plt.tight_layout()
+    plt.savefig("results/el_data.png", dpi=600)
     plt.show()
-
+    
     # plot electricity from grid & PV
     fig, ax = plt.subplots(figsize=(10, 5))
     electricity_bus["sequences"].iloc[:, 4:6].plot(
@@ -79,7 +100,7 @@ def process_results(results):
         loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.3), ncol=2
     )
     fig.subplots_adjust(top=0.8)
-    plt.savefig("results/grid_pv_data.png", dpi=1200)
+    plt.savefig("results/grid_pv_data.png", dpi=600)
     plt.show()
 
     # plot excess

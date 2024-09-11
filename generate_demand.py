@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import demandlib.bdew as bdew
 import demandlib.particular_profiles as profiles
 
-
 def read_data(TRY):
 
     if TRY:
@@ -29,13 +28,13 @@ def read_data(TRY):
 
 def gen_heat_demand(df_temp):
 
-    #anzahl_MFH = 35 # 15 WE pro MFH = 525 WE
-    #beh_wohnfl_proMFH = 1091.9 # m2
-    #heizbed_pro_mq = 133 # kWh/m2a
-    annual_heat_demand = {"MFH" : 5082794.5}
+    anzahl_MFH = 35 # 15 WE pro MFH = 525 WE
+    beh_wohnfl_proMFH = 1091.9 # m2
+    heizbed_pro_mq = 133 # kWh/m2a
+    annual_heat_demand = {"MFH" : heizbed_pro_mq*beh_wohnfl_proMFH*anzahl_MFH}
 
     # 2890  el kWh je Haushalt (2 Personen) 2890*525 = 1517250
-    annual_el_demand = {"h0_dyn" : 1517250}
+    annual_el_demand = {"h0_dyn" : 15*anzahl_MFH*2890}
 
 
     # define holidays for Berlin for 2023
@@ -82,11 +81,11 @@ def gen_heat_demand(df_temp):
 
     demand["demand_el"] = elec_demand_resampled
 
-   ## Plot demand of building
-   #ax = demand["MFH"].plot()
-   #ax.set_ylabel("Heat demand in kW")
-   #plt.savefig("results/heat_demand_data.png",dpi=1200)
-   #plt.show()
+    # Plot demand of building
+    ax = demand["MFH"].plot()
+    ax.set_ylabel("Heat demand in kW")
+    plt.savefig("results/heat_demand_data.png",dpi=1200)
+    plt.show()
    #
    #plt.clf()
    #
@@ -95,10 +94,37 @@ def gen_heat_demand(df_temp):
    #ax.set_ylabel("Power demand")
    #plt.savefig("results/el_demand_data.png",dpi=1200)
    #plt.show()
-
+   
     return demand
 
-df = read_data(TRY=True)
-df_temp = df["Temperature [°C]"]
-demand = gen_heat_demand(df_temp)
-print(demand["demand_el"])
+def gen_pv_data():
+    #create weather dataframe
+    df_weather = pd.read_csv("data/pv_data_2023.csv")
+    hourly_index = pd.date_range(start='2023-01-01 00:00:00', end='2023-12-31 23:00:00', freq='H')
+    df_weather.index = hourly_index
+    
+    
+    system_data = {
+    'module_name': 'Advent_Solar_Ventura_210___2008_',  # module name as in database
+    'inverter_name': 'ABB__MICRO_0_25_I_OUTD_US_208__208V_',  # inverter name as in database
+    'azimuth': 180,
+    'tilt': 30,
+    'albedo': 0.2}
+    #generate pv output
+    df_pv = feedinlib.weather.FeedinWeather(data=df_weather)
+    
+    pv_module = feedinlib.models.PvlibBased()
+    pv_output = pv_module.get_pv_power_output(weather=df_weather)
+    
+    
+    # Now `pv_output` contains the calculated PV feed-in data
+    print(pv_output)
+
+    
+    
+    return df_weather
+
+#pv_data = gen_pv_data()
+#df = read_data(TRY=True)
+#df_temp = df["Temperature [°C]"]
+#demand = gen_heat_demand(df_temp)
