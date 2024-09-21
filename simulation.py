@@ -16,8 +16,8 @@ from oemof.solph import views
 from process_results import process_results
 from generate_demand import read_data, gen_heat_demand
 # SET PARAMS
-hp_COP = 4.009
-orc_eff = 0.25
+hp_COP = 2.72125
+orc_eff = 0.12
 storage_cap = 175000 #kWh
 storage_output = 2900 #kW
 storage_input = 2900 #kW

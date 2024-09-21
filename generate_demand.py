@@ -8,6 +8,11 @@ import matplotlib.pyplot as plt
 import demandlib.bdew as bdew
 import demandlib.particular_profiles as profiles
 
+from feedinlib import powerplants as plants
+from feedinlib import models
+from feedinlib import weather
+import pytz
+
 def read_data(TRY):
 
     if TRY:
@@ -97,34 +102,7 @@ def gen_heat_demand(df_temp):
    
     return demand
 
-def gen_pv_data():
-    #create weather dataframe
-    df_weather = pd.read_csv("data/pv_data_2023.csv")
-    hourly_index = pd.date_range(start='2023-01-01 00:00:00', end='2023-12-31 23:00:00', freq='H')
-    df_weather.index = hourly_index
-    
-    
-    system_data = {
-    'module_name': 'Advent_Solar_Ventura_210___2008_',  # module name as in database
-    'inverter_name': 'ABB__MICRO_0_25_I_OUTD_US_208__208V_',  # inverter name as in database
-    'azimuth': 180,
-    'tilt': 30,
-    'albedo': 0.2}
-    #generate pv output
-    df_pv = feedinlib.weather.FeedinWeather(data=df_weather)
-    
-    pv_module = feedinlib.models.PvlibBased()
-    pv_output = pv_module.get_pv_power_output(weather=df_weather)
-    
-    
-    # Now `pv_output` contains the calculated PV feed-in data
-    print(pv_output)
-
-    
-    
-    return df_weather
-
-#pv_data = gen_pv_data()
-#df = read_data(TRY=True)
-#df_temp = df["Temperature [°C]"]
-#demand = gen_heat_demand(df_temp)
+if __name__ == "__main__":
+    df = read_data(TRY=True)
+    df_temp = df["Temperature [°C]"]
+    demand = gen_heat_demand(df_temp)
