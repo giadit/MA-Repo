@@ -5,6 +5,7 @@ from pvlib.location import Location
 from pvlib.pvsystem import PVSystem
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -65,9 +66,10 @@ def fetch_pv_data():
 
     # Get AC power output
     # we need 2 inverters, so 4 strings each side
+    #scaled for 35 units
     #scaled to kW
-    power_east = 2*mc_east.results.ac/1000
-    power_west = 2*mc_west.results.ac/1000
+    power_east = 0.66*35*2*mc_east.results.ac/1000
+    power_west = 0.66*35*2*mc_west.results.ac/1000
 
     # Combine both systems' outputs
     total_power = power_east + power_west

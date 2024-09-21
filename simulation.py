@@ -15,6 +15,7 @@ from oemof.solph import views
 
 from process_results import process_results
 from generate_demand import read_data, gen_heat_demand
+from pv_data import fetch_pv_data
 # SET PARAMS
 hp_COP = 2.72125
 orc_eff = 0.12
@@ -25,8 +26,8 @@ storage_eff = 0.98
 storage_loss = 0.002 # 0.2 %/day
 
 
-#to be removed later, now for PV and Wind
-data = pd.read_csv("basic_example.csv")
+#PV data
+pv_data = fetch_pv_data()
 
 df = read_data(TRY=True)
 df_temp = df["Temperature [°C]"]
@@ -38,7 +39,7 @@ grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2)
 #Remove negative costs as they cant be processed
 grid_costs[grid_costs["Preis (EUR/kWh)"] <= 0] = 0
 
-year_index = create_time_index(year=2023, number=len(data))
+year_index = create_time_index(year=2023, number=len(pv_data))
 energysys = solph.EnergySystem(timeindex=year_index, infer_last_interval=False)
 
 #generate buses
@@ -65,12 +66,12 @@ grid = cmp.Source(
 #fixed source for pv
 pv = cmp.Source(
         label="pv",
-        outputs={bel: flows.Flow(fix=data["pv"], nominal_value=5820)})
+        outputs={bel: flows.Flow(fix=pv_data, nominal_value=1)})
 #create convereter (HeatPump)
 HP = cmp.Converter(
         label = "HP",
         inputs={bel: flows.Flow()},
-        outputs={th1: flows.Flow()},
+        outputs={th1: flows.Flow(nominal_value=1, max=3000)},
         conversion_factors={th1: hp_COP}) # technikkatalog
 #create storage system
 storage = cmp.GenericStorage(
