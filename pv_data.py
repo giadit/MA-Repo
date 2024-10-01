@@ -27,14 +27,14 @@ def fetch_pv_data():
     module = {
         'Name': 'SunPower Maxeon 3 400 W',
         'pdc0': 400,  # Nominal max power (W)
-        'gamma_pdc': -0.0035,  # Power temperature coefficient (%/°C)
+        'gamma_pdc': -0.0027,  # Power temperature coefficient (%/°C)
         'efficiency': 0.226  # Module efficiency
     }
 
     # Inverter (SMA Sunny Tripower 25000TL) parameters
     inverter = {
         'pdc0': 25000,  # Max AC power output (W)
-        'eta_inv_nom': 0.985  # Inverter efficiency
+        'eta_inv_nom': 0.981  # Inverter efficiency
     }
 
     temperature_parameters = TEMPERATURE_MODEL_PARAMETERS["sapm"]["open_rack_glass_glass"]
@@ -45,8 +45,8 @@ def fetch_pv_data():
         module_parameters=module,
         inverter_parameters=inverter,
         temperature_model_parameters= temperature_parameters,
-        modules_per_string=29,  # Example: 29 panels per string (to be sized per inverter voltage specs)
-        strings_per_inverter=2  # Example: 4 strings for this inverter configuration
+        modules_per_string=28,  # 28 panels per string / 199.5*0.5/1.72 = 56
+        strings_per_inverter=2  #  2 strings for this inverter configuration
     )
     system_west = PVSystem(
         surface_tilt=27,  # Tilt angle of the roof
@@ -54,7 +54,7 @@ def fetch_pv_data():
         module_parameters=module,
         inverter_parameters=inverter,
         temperature_model_parameters=temperature_parameters,
-        modules_per_string=29,  # Same configuration as the East-facing system
+        modules_per_string=28,  # Same configuration as the East-facing system
         strings_per_inverter=2
     )
 
@@ -65,11 +65,10 @@ def fetch_pv_data():
     mc_west.run_model(df_pv)
 
     # Get AC power output
-    # we need 2 inverters, so 4 strings each side
     #scaled for 35 units
     #scaled to kW
-    power_east = 0.66*35*2*mc_east.results.ac/1000
-    power_west = 0.66*35*2*mc_west.results.ac/1000
+    power_east = 35*mc_east.results.ac/1000
+    power_west = 35*mc_west.results.ac/1000
 
     # Combine both systems' outputs
     total_power = power_east + power_west

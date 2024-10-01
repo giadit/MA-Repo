@@ -43,8 +43,9 @@ year_index = create_time_index(year=2023, number=len(pv_data))
 energysys = solph.EnergySystem(timeindex=year_index, infer_last_interval=False)
 
 #generate buses
-th1 = buses.Bus(label="th. Energy HP")
-th2 = buses.Bus(label="th. Energy ORC")
+th_hp = buses.Bus(label="th. Energy HP")
+th_orc = buses.Bus(label="th. Energy ORC")
+th_sink = buses.Bus(label="th. Energy Demand")
 bel = buses.Bus(label="electricity")
 
 #excess component for overproduction of el
@@ -58,7 +59,13 @@ demand_el = cmp.Sink(
 #adding th demand
 demand_th = cmp.Sink(
         label="demand_th",
-        inputs={th2: flows.Flow(fix= demand["MFH"], nominal_value = 1)})
+        inputs={th_sink: flows.Flow(fix= demand["MFH"], nominal_value = 1)})
+#bridge for demand
+bridge = cmp.Converter(
+        label = "bridge",
+        inputs={th_hp: flows.Flow(),th_orc: flows.Flow() },
+        outputs={th_sink: flows.Flow()},
+        conversion_factors={th_hp: 1, th_orc:1})
 #create grid
 grid = cmp.Source(
         label="grid",
@@ -71,14 +78,14 @@ pv = cmp.Source(
 HP = cmp.Converter(
         label = "HP",
         inputs={bel: flows.Flow()},
-        outputs={th1: flows.Flow(nominal_value=1, max=3000)},
-        conversion_factors={th1: hp_COP}) # technikkatalog
+        outputs={th_hp: flows.Flow(nominal_value=1, max=3000)},
+        conversion_factors={th_hp: hp_COP}) # technikkatalog
 #create storage system
 storage = cmp.GenericStorage(
         nominal_storage_capacity= storage_cap,
         label = "storage",
-        inputs = {th1: flows.Flow(nominal_value= storage_input)},
-        outputs = {th2: flows.Flow(nominal_value= storage_output, variable_costs=0.001)},
+        inputs = {th_hp: flows.Flow(nominal_value= storage_input)},
+        outputs = {th_orc: flows.Flow(nominal_value= storage_output, variable_costs=0.001)},
         loss_rate = storage_loss/24,
         initial_storage_level = None,
         inflow_conversion_factor=1,
@@ -86,12 +93,15 @@ storage = cmp.GenericStorage(
 #create convereter (ORC)
 ORC = cmp.Converter(
         label = "ORC",
-        inputs={th2: flows.Flow()},
+        inputs={th_orc: flows.Flow()},
         outputs={bel: flows.Flow()},
         conversion_factors={bel: orc_eff})
 #add nodes to system
-energysys.add(th1,th2,bel,
-              excess_bel,demand_th,demand_el,grid,pv,
+energysys.add(th_hp, th_orc, th_sink,
+              bel, excess_bel,
+              demand_th, demand_el,
+              grid, pv,
+              bridge,
               ORC, HP, storage)
 
 #create optimization
