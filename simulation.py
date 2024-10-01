@@ -60,12 +60,18 @@ demand_el = cmp.Sink(
 demand_th = cmp.Sink(
         label="demand_th",
         inputs={th_sink: flows.Flow(fix= demand["MFH"], nominal_value = 1)})
-#bridge for demand
-bridge = cmp.Converter(
-        label = "bridge",
-        inputs={th_hp: flows.Flow(),th_orc: flows.Flow() },
+#bridge for ORC
+bridgeORC = cmp.Converter(
+        label = "bridgeORC",
+        inputs={th_orc: flows.Flow() },
         outputs={th_sink: flows.Flow()},
-        conversion_factors={th_hp: 1, th_orc:1})
+        conversion_factors={th_orc:1})
+#bridge for HP
+bridgeHP = cmp.Converter(
+        label = "bridgeHP",
+        inputs={th_hp: flows.Flow()},
+        outputs={th_sink: flows.Flow()},
+        conversion_factors={th_hp: 1})
 #create grid
 grid = cmp.Source(
         label="grid",
@@ -77,8 +83,8 @@ pv = cmp.Source(
 #create convereter (HeatPump)
 HP = cmp.Converter(
         label = "HP",
-        inputs={bel: flows.Flow()},
-        outputs={th_hp: flows.Flow(nominal_value=1, max=3000)},
+        inputs={bel: flows.Flow(nominal_value=1, max=3000/hp_COP)},
+        outputs={th_hp: flows.Flow()},
         conversion_factors={th_hp: hp_COP}) # technikkatalog
 #create storage system
 storage = cmp.GenericStorage(
@@ -101,7 +107,7 @@ energysys.add(th_hp, th_orc, th_sink,
               bel, excess_bel,
               demand_th, demand_el,
               grid, pv,
-              bridge,
+              bridgeHP, bridgeORC,
               ORC, HP, storage)
 
 #create optimization
