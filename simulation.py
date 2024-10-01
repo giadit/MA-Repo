@@ -60,12 +60,6 @@ demand_el = cmp.Sink(
 demand_th = cmp.Sink(
         label="demand_th",
         inputs={th_sink: flows.Flow(fix= demand["MFH"], nominal_value = 1)})
-#bridge for demand
-bridge = cmp.Converter(
-        label = "bridge",
-        inputs={th_hp: flows.Flow(),th_orc: flows.Flow() },
-        outputs={th_sink: flows.Flow()},
-        conversion_factors={th_hp: 1, th_orc:1})
 #create grid
 grid = cmp.Source(
         label="grid",
