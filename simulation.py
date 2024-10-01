@@ -104,11 +104,16 @@ ORC = cmp.Converter(
         conversion_factors={bel: orc_eff})
 #add nodes to system
 energysys.add(th_hp, th_orc, th_sink,
-              bel, excess_bel,
-              demand_th, demand_el,
-              grid, pv,
-              bridgeHP, bridgeORC,
-              ORC, HP, storage)
+             bel, excess_bel,
+             demand_th, demand_el,
+             grid, pv,
+             bridgeHP, bridgeORC,
+             ORC, HP, storage)
+#energysys.add(th_hp, th_orc,
+#              bel, excess_bel,
+#              demand_el,
+#              grid, pv,
+#              ORC, HP, storage)
 
 #create optimization
 om = solph.Model(energysys)
