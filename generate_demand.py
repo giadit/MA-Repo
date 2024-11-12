@@ -86,11 +86,11 @@ def gen_heat_demand(df_temp):
 
     demand["demand_el"] = elec_demand_resampled
 
-    # Plot demand of building
-    ax = demand["MFH"].plot()
-    ax.set_ylabel("Heat demand in kW")
-    plt.savefig("results/heat_demand_data.png",dpi=1200)
-    plt.show()
+   ## Plot demand of building
+   #ax = demand["MFH"].plot()
+   #ax.set_ylabel("Heat demand in kW")
+   #plt.savefig("results/heat_demand_data.png",dpi=1200)
+   #plt.show()
    #
    #plt.clf()
    #

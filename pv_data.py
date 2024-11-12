@@ -74,13 +74,13 @@ def fetch_pv_data():
     total_power = power_east + power_west
 
     # Plot total power output
-    plt.figure(figsize=(10, 6))
-    total_power.plot(label='Total Power (East + West)', color='blue')
-    power_east.plot(label='East Power', color='orange')
-    power_west.plot(label='West Power', color='green')
-    plt.ylabel('AC Power Output (kW)')
-    plt.legend()
-    plt.show()
+    #total_power.plot(label='Total Power (East + West)', color='blue')
+    #power_east.plot(label='East Power', color='orange')
+    #plt.figure(figsize=(10, 6))
+    #power_west.plot(label='West Power', color='green')
+    #plt.ylabel('AC Power Output (kW)')
+    #plt.legend()
+    #plt.show()
 
     #system = PVSystem(surface_tilt=45,surface_azimuth=180,
     #                  module_parameters=module, inverter_parameters=inverter,
@@ -97,3 +97,4 @@ def fetch_pv_data():
 
 if __name__ == "__main__":
     pv_data = fetch_pv_data()
+    pv_data.to_csv("results/pv_data_results.csv")
