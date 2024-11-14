@@ -9,9 +9,9 @@ from generate_demand import read_data, gen_heat_demand
 from pv_data import fetch_pv_data
 
 # SET PARAMS
-hp_COP = 2.72125
+hp_COP = 3.21375
 hp_peak = 3000
-orc_eff = 0.12
+orc_eff = 0.15
 orc_peak = 400
 storage_cap = 175000  # kWh
 storage_output = 2900  # kW
@@ -20,7 +20,7 @@ storage_eff = 0.98
 storage_loss = 0.002  # 0.2 %/day
 
 yearly_costs = 0
-hour_interval = 168
+hour_interval = int(8760/52)
 # Load Data
 pv_data = fetch_pv_data()
 df = read_data(TRY=True)
@@ -51,7 +51,7 @@ for i in range(0, 8760, hour_interval):
     slices.append(i)
 # Loop through each week and run optimization
 for week_idx, week in enumerate(weeks):
-    print(f"Optimizing Week {week_idx + 1}")
+    print(f"Optimizing Slice {week_idx + 1}")
 
     # Subset data for the current week
     week_pv_data = pv_data["p_mp"][slices[week_idx]:slices[week_idx]+hour_interval+1].reset_index(drop=True)
@@ -127,9 +127,10 @@ for week_idx, week in enumerate(weeks):
     thdemand_results = pd.concat([thdemand_results, thermal_bus_demand.iloc[:-1]])
     el_results = pd.concat([el_results, electricity_bus.iloc[:-1]])
 
+    print(custom_storage.iloc[-2])
     # Update initial storage level for the next week
-    initial_storage_level = custom_storage.iloc[0][-1] / storage_cap  # Normalize to capacity
-    print(initial_storage_level)
+    initial_storage_level = custom_storage.iloc[-2,0] / storage_cap  # Normalize to capacity
+    print(custom_storage.iloc[-2,0], initial_storage_level)
 
 print(yearly_costs)
 storage_results.to_csv("results/storage_rollinghorizon.csv")
