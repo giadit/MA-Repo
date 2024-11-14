@@ -72,7 +72,7 @@ def fetch_pv_data():
 
     # Combine both systems' outputs
     total_power = power_east + power_west
-
+    total_power= total_power.to_frame()
     # Plot total power output
     #total_power.plot(label='Total Power (East + West)', color='blue')
     #power_east.plot(label='East Power', color='orange')
@@ -98,3 +98,4 @@ def fetch_pv_data():
 if __name__ == "__main__":
     pv_data = fetch_pv_data()
     pv_data.to_csv("results/pv_data_results.csv")
+    print(pv_data)
