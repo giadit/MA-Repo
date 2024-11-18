@@ -22,10 +22,15 @@ storage_output = 2900  # kW
 storage_input = 2900  # kW
 storage_eff = 0.98
 storage_loss = 0.002  # 0.2 %/day
+battery_output = 18000  # kW
+battery_input = 3000  # kW
+battery_eff = 0.95
+battery_loss = 0.001  # 0.1 %/day
 COP, eta = eff_calc(150, norm = True)
-epc_storage = economics.annuity(capex=3.3,n=40,wacc=0.05)
+
+epc_battery = economics.annuity(capex=1042,n=20,wacc=0.05)
 epc_HP = economics.annuity(capex=782, n=30,wacc=0.05)
-epc_ORC = economics.annuity(capex=2880,n=30,wacc=0.05)
+epc_storage = economics.annuity(capex=3.3,n=40,wacc=0.05)
 
 
 yearly_costs = 0
@@ -74,49 +79,48 @@ for week_idx, week in enumerate(weeks):
     energysys = solph.EnergySystem(timeindex=week, infer_last_interval=True)
 
     # Define buses
-    th_hp = buses.Bus(label="th. Energy HP")
-    th_orc = buses.Bus(label="th. Energy ORC")
-    th_sink = buses.Bus(label="th. Energy Demand")
+    thbus = buses.Bus(label="th. Energy")
     bel = buses.Bus(label="electricity")
 
     # Add components (similar to your original setup)
     excess_bel = cmp.Sink(label="excess_bel", inputs={bel: flows.Flow()})
     demand_el = cmp.Sink(label="demand_el", inputs={bel: flows.Flow(fix=week_demand_el, nominal_value=1)})
-    demand_th = cmp.Sink(label="demand_th", inputs={th_sink: flows.Flow(fix=week_demand_th, nominal_value=1)})
-
-    bridgeORC = cmp.Converter(label="bridgeORC", inputs={th_orc: flows.Flow()}, outputs={th_sink: flows.Flow()},
-                              conversion_factors={th_orc: 1})
-    bridgeHP = cmp.Converter(label="bridgeHP", inputs={th_hp: flows.Flow()}, outputs={th_sink: flows.Flow()},
-                             conversion_factors={th_hp: 1})
+    demand_th = cmp.Sink(label="demand_th", inputs={thbus: flows.Flow(fix=week_demand_th, nominal_value=1)})
 
     grid = cmp.Source(label="grid", outputs={bel: flows.Flow(variable_costs=week_grid_costs)})
     pv = cmp.Source(label="pv", outputs={bel: flows.Flow(fix=week_pv_data, nominal_value=1)})
 
     HP = cmp.Converter(label="HP", inputs={bel: flows.Flow()},
-                       outputs={th_hp: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_HP))},
-                       conversion_factors={th_hp: COP["COP"]})
+                       outputs={thbus: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_HP))},
+                       conversion_factors={thbus: COP["COP"]})
 
 
     # Configure storage with rolling initial level
     storage = cmp.GenericStorage(
         #nominal_storage_capacity=storage_cap,
-        label="storage",
-        inputs={th_hp: flows.Flow(nominal_value=storage_input)},
-        outputs={th_orc: flows.Flow(nominal_value=storage_output)},
+        label="TES",
+        inputs={thbus: flows.Flow(nominal_value=storage_input)},
+        outputs={thbus: flows.Flow(nominal_value=storage_output)},
         loss_rate=storage_loss / 24,
         initial_storage_level=initial_storage_level, balanced=True,
         inflow_conversion_factor=1,
         outflow_conversion_factor=storage_eff,
         investment= solph.Investment(ep_costs=epc_storage)
     )
-
-    ORC = cmp.Converter(label="ORC",
-                        inputs={th_orc: flows.Flow()},
-                        outputs={bel: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_ORC))},
-                        conversion_factors={bel: eta["Efficiency"]})
+    battery = cmp.GenericStorage(
+        # nominal_storage_capacity=storage_cap,
+        label="battery",
+        inputs={bel: flows.Flow(nominal_value=battery_input)},
+        outputs={bel: flows.Flow(nominal_value=battery_output)},
+        loss_rate=battery_loss / 24,
+        initial_storage_level=initial_storage_level, balanced=True,
+        inflow_conversion_factor=1,
+        outflow_conversion_factor=battery_eff,
+        investment=solph.Investment(ep_costs=epc_battery, minimum= 100)
+    )
 
     # Add components to energy system
-    energysys.add(th_hp, th_orc, th_sink, bel, excess_bel, demand_th, demand_el, grid, pv, bridgeHP, bridgeORC, ORC, HP, storage)
+    energysys.add(thbus, bel, excess_bel, demand_th, demand_el, grid, pv, HP, storage, battery)
 
     # Optimization model for the week
     om = Model(energysys)
@@ -130,41 +134,25 @@ for week_idx, week in enumerate(weeks):
     yearly_costs += total_cost
 
     # Process and analyze results as needed
-    custom_storage = views.node(results, "storage")["sequences"]
-    thermal_bus_orc = views.node(results, "th. Energy ORC")["sequences"]
-    thermal_bus_hp = views.node(results, "th. Energy HP")["sequences"]
-    thermal_bus_demand = views.node(results, "th. Energy Demand")["sequences"]
+    TES_storage = views.node(results, "TES")["sequences"]
+    Battery_storage = views.node(results, "battery")["sequences"]
+    thermal_bus = views.node(results, "th. Energy")["sequences"]
     electricity_bus = views.node(results, "electricity")["sequences"]
-
-    storage_results = pd.concat([storage_results, custom_storage.iloc[:-1]])
-    HP_results = pd.concat([HP_results, thermal_bus_hp.iloc[:-1]])
-    ORC_results = pd.concat([ORC_results, thermal_bus_orc.iloc[:-1]])
-    thdemand_results = pd.concat([thdemand_results, thermal_bus_demand.iloc[:-1]])
-    el_results = pd.concat([el_results, electricity_bus.iloc[:-1]])
-
-    # Update initial storage level for the next week
-    initial_storage_level = custom_storage.iloc[-2,0] / storage_cap  # Normalize to capacity
 
     # Extract investments for storage, HP, and ORC
     storage_investment = extract_investment(results=results, component_label="storage")
     hp_investment = extract_investment(results=results, component_label="HP")
-    orc_investment = extract_investment(results=results, component_label="ORC")
+    battery_investment = extract_investment(results=results, component_label="battery")
 
     # Annualized costs
     storage_annual_cost = epc_storage * storage_investment
     hp_annual_cost = epc_HP * hp_investment
-    orc_annual_cost = epc_ORC * orc_investment
+    battery_annual_cost = epc_battery * battery_investment
 
     # Log results
     print(f"Week {week_idx + 1} - Investments and Capacities:")
     print(f"  Storage investment (kWh): {storage_investment}, Cost: €{storage_annual_cost:.2f}")
     print(f"  HP investment (kW): {hp_investment}, Cost: €{hp_annual_cost:.2f}")
-    print(f"  ORC investment (kW): {orc_investment}, Cost: €{orc_annual_cost:.2f}")
+    print(f"  Battery investment (kW): {battery_investment}, Cost: €{battery_annual_cost:.2f}")
     print(f"  Total Cost (sans Investment): €{yearly_costs:.2f}")
-
-storage_results.to_csv("results/storage_rollinghorizon.csv")
-ORC_results.to_csv("results/ORC_rollinghorizon.csv")
-HP_results.to_csv("results/HP_rollinghorizon.csv")
-thdemand_results.to_csv("results/thdemand_rollinghorizon.csv")
-el_results.to_csv("results/el_rollinghorizon.csv")
 
