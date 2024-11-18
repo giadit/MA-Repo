@@ -30,7 +30,7 @@ plt.plot(date_range, storage["SOC"]/1000, color='#3269CC', alpha=1)
 plt.xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
 plt.ylim(0,185)
 date_format = DateFormatter('%b. %Y')
-plt.gca().xaxis.set_major_formatter(date_format)
+#plt.gca().xaxis.set_major_formatter(date_format)
 # Adding labels and title
 plt.xticks(rotation=45)
 plt.ylabel('State of Charge [MWh]')

@@ -31,18 +31,17 @@ storage_loss = 0.002 # 0.2 %/day
 #PV data
 pv_data = fetch_pv_data()
 
-df = read_data(TRY=True)
+df = read_data(TRY=False)
 df_temp = df["Temperature [°C]"]
 # th and el demand
 demand = gen_heat_demand(df_temp)
 demand.to_csv("results/demand.csv")
 #el prices
 grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2, delimiter=";")
-print(grid_costs["End User Price [EUR/kWh]"])
 #Remove negative costs as they cant be processed
 grid_costs[grid_costs["End User Price [EUR/kWh]"] <= 0] = 0
 
-year_index = create_time_index(year=2023, number=len(pv_data))
+year_index = create_time_index(year=2023, number=len(pv_data)-1)
 energysys = solph.EnergySystem(timeindex=year_index, infer_last_interval=False)
 
 #instantiate buses
