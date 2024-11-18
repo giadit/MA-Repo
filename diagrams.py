@@ -28,7 +28,7 @@ plt.figure(figsize=(10, 6))
 plt.plot(date_range, storage["SOC"]/1000, color='#3269CC', alpha=1)
 #plt.plot(date_range, el_bus["from PV"], label='PV', color='orange', alpha=0.7)
 plt.xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
-plt.ylim(0,185)
+plt.ylim(0,storage["SOC"].max()*1.1/1000)
 date_format = DateFormatter('%b. %Y')
 #plt.gca().xaxis.set_major_formatter(date_format)
 # Adding labels and title
