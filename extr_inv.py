@@ -8,7 +8,7 @@ def extract_investment(results, component_label):
         if component_label in str(key):
             try:
                 investment = results[key]["scalars"]["invest"]
-                print(f"Investment for {component_label}: {investment}")
+
                 return investment
             except KeyError:
                 print(f"No investment data found for {component_label}.")

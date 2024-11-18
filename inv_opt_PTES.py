@@ -111,7 +111,8 @@ for week_idx, week in enumerate(weeks):
 
     ORC = cmp.Converter(label="ORC",
                         inputs={th_orc: flows.Flow()},
-                        outputs={bel: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_ORC, minimum=100))}, conversion_factors={bel: orc_eff})
+                        outputs={bel: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_ORC, minimum=100))},
+                        conversion_factors={bel: eta["Efficiency"]})
 
     # Add components to energy system
     energysys.add(th_hp, th_orc, th_sink, bel, excess_bel, demand_th, demand_el, grid, pv, bridgeHP, bridgeORC, ORC, HP, storage)
@@ -148,11 +149,6 @@ for week_idx, week in enumerate(weeks):
     hp_investment = extract_investment(results=results, component_label="HP")
     orc_investment = extract_investment(results=results, component_label="ORC")
 
-    # Display results
-    print(f"Storage Investment: {storage_investment}")
-    print(f"HP Investment: {hp_investment}")
-    print(f"ORC Investment: {orc_investment}")
-
     # Annualized costs
     storage_annual_cost = epc_storage * storage_investment
     hp_annual_cost = epc_HP * hp_investment
@@ -163,7 +159,7 @@ for week_idx, week in enumerate(weeks):
     print(f"  Storage investment (kWh): {storage_investment}, Cost: €{storage_annual_cost:.2f}")
     print(f"  HP investment (kW): {hp_investment}, Cost: €{hp_annual_cost:.2f}")
     print(f"  ORC investment (kW): {orc_investment}, Cost: €{orc_annual_cost:.2f}")
-    print(f"  Total Cost (sans Investment): €{yearly_costs:.2f}")
+    print(f"  Total Cost: €{yearly_costs:.2f}")
 
 storage_results.to_csv("results/storage_rollinghorizon.csv")
 ORC_results.to_csv("results/ORC_rollinghorizon.csv")
