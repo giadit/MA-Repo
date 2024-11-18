@@ -154,5 +154,5 @@ for week_idx, week in enumerate(weeks):
     print(f"  Storage investment (kWh): {storage_investment}, Cost: €{storage_annual_cost:.2f}")
     print(f"  HP investment (kW): {hp_investment}, Cost: €{hp_annual_cost:.2f}")
     print(f"  Battery investment (kW): {battery_investment}, Cost: €{battery_annual_cost:.2f}")
-    print(f"  Total Cost (sans Investment): €{yearly_costs:.2f}")
+    print(f"  Total Cost: €{yearly_costs:.2f}")
 

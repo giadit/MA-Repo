@@ -160,7 +160,7 @@ for week_idx, week in enumerate(weeks):
     print(f"  Storage investment (kWh): {storage_investment}, Cost: €{storage_annual_cost:.2f}")
     print(f"  HP investment (kW): {hp_investment}, Cost: €{hp_annual_cost:.2f}")
     print(f"  ORC investment (kW): {orc_investment}, Cost: €{orc_annual_cost:.2f}")
-    print(f"  Total Cost (sans Investment): €{yearly_costs:.2f}")
+    print(f"  Total Cost : €{yearly_costs:.2f}")
 
 storage_results.to_csv("results/storage_rollinghorizon.csv")
 ORC_results.to_csv("results/ORC_rollinghorizon.csv")
