@@ -8,44 +8,57 @@ battery_file = "results/battery/battery_results.csv"
 thdemand_file = "results/battery/th_results.csv"
 el_file = "results/battery/el_results.csv"
 
-TES_names = ["SOC","to TES","from TES"]
-battery_names = ["SOC","to battery","from battery"]
-th_names = ["from storage","to ORC","to demand"]
-el_names = ["from grid","from battery","to demand"]
+TES_names = ["SOC","from TES","to TES"]
+battery_names = ["SOC","from battery","to battery"]
+th_names = ["from HP","from TES","to TES","to demand"]
+el_names = ["from battery","to HP","to battery","to_demand","to excess","from grid","from PV"]
 
-demand = pd.read_csv("results/demand.csv")
-storage = pd.read_csv(storage_file, header=0, names=storage_names)
+TES = pd.read_csv(TES_file, header=0, names=TES_names)
 el_bus = pd.read_csv(el_file, header=0, names=el_names)
-th_bus_HP = pd.read_csv(HP_file, header=0, names=hp_names)
-th_bus_ORC = pd.read_csv(ORC_file, header=0, names=orc_names)
-th_bus_demand = pd.read_csv(thdemand_file, header=0, names=demand_names)
+th_bus = pd.read_csv(thdemand_file, header=0, names=th_names)
+battery = pd.read_csv(battery_file, header=0, names=battery_names)
 date_range = pd.date_range(start='2023-01-01', end='2023-12-31 23:00:00', freq='h')
 
-# Plotting the data
-plt.figure(figsize=(10, 6))
-plt.plot(date_range, storage["SOC"]/1000, color='#3269CC', alpha=1)
-#plt.plot(date_range, el_bus["from PV"], label='PV', color='orange', alpha=0.7)
-plt.xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
-plt.ylim(0,storage["SOC"].max()*1.1/1000)
-date_format = DateFormatter('%b. %Y')
-#plt.gca().xaxis.set_major_formatter(date_format)
-# Adding labels and title
-plt.xticks(rotation=45)
-plt.ylabel('State of Charge [MWh]')
+import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
 
-# Display the plot
+# Creating the figure and subplots
+fig, axes = plt.subplots(1, 2, figsize=(15, 6))  # 1 row, 2 columns of plots
+
+# First plot (left diagram)
+axes[0].plot(date_range, TES["SOC"] / 1000, color='#3269CC', alpha=1)
+axes[0].set_xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
+axes[0].set_ylim(0, TES["SOC"].max() * 1.1 / 1000)
+axes[0].set_ylabel('State of Charge [MWh]')
+axes[0].set_xticks(pd.date_range('2023-01-01', '2023-12-31', freq='MS'))
+axes[0].tick_params(axis='x', rotation=45)
+axes[0].set_title("State of Charge (TES)")
+
+# Second plot (right diagram)
+axes[1].plot(date_range, battery["SOC"] / 1000, color='orange', alpha=1)  # Same data for demo, replace as needed
+axes[1].set_xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
+axes[1].set_ylim(0, battery["SOC"].max() * 1.1 / 1000)
+axes[1].set_ylabel('State of Charge [MWh]')
+axes[1].set_xticks(pd.date_range('2023-01-01', '2023-12-31', freq='MS'))
+axes[1].tick_params(axis='x', rotation=45)
+axes[1].set_title("State of Charge (Battery)")
+
+# Adjusting layout
+fig.tight_layout()
+
+# Display the plots
 plt.show()
 
+
 # Plotting the data
 plt.figure(figsize=(10, 6))
-plt.plot(date_range, th_bus_ORC["to demand"], label="to demand", color='#3269CC', alpha=1)
-plt.plot(date_range, th_bus_ORC["to ORC"], label='to ORC', color='orange', alpha=0.7)
+plt.plot(date_range, el_bus["to excess"], label="to excess", color='#3269CC', alpha=1)
 plt.xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
 date_format = DateFormatter('%b. %Y')
 plt.gca().xaxis.set_major_formatter(date_format)
 # Adding labels and title
 plt.xticks(rotation=45)
-plt.ylabel('th. Energy [kW]')
+plt.ylabel('Excess el. Energy [kW]')
 plt.legend()  # Adds the custom labels to the legend
 
 plt.show()
@@ -53,7 +66,7 @@ plt.show()
 # Plotting the data
 plt.figure(figsize=(10, 6))
 plt.plot(date_range, el_bus["from grid"], label='from Grid', color='#3269CC', alpha=1)
-plt.plot(date_range, el_bus["from ORC"], label="from ORC", color="orange", alpha=0.7)
+plt.plot(date_range, el_bus["from battery"], label="from battery", color="orange", alpha=0.7)
 plt.xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
 date_format = DateFormatter('%b. %Y')
 plt.gca().xaxis.set_major_formatter(date_format)
@@ -65,8 +78,8 @@ plt.legend()  # Adds the custom labels to the legend
 plt.show()
 
 plt.figure(figsize=(10, 6))
-plt.plot(date_range, th_bus_demand["from HP"], label='from HP', color='blue', alpha=0.8)
-plt.plot(date_range, th_bus_demand["from ORC"], label="from TES", color="orange", alpha=0.7)
+plt.plot(date_range, th_bus["from HP"], label='from HP', color='blue', alpha=0.8)
+plt.plot(date_range, th_bus["from TES"], label="from TES", color="orange", alpha=0.7)
 plt.xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
 #date_format = DateFormatter('%b. %Y')
 #plt.gca().xaxis.set_major_formatter(date_format)
