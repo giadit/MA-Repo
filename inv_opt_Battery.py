@@ -57,8 +57,8 @@ eta.set_index(year_index)
 #create slices
 slices = []
 
-storage_results = pd.DataFrame()
-ORC_results = pd.DataFrame()
+TES_results = pd.DataFrame()
+battery_results = pd.DataFrame()
 HP_results = pd.DataFrame()
 thdemand_results = pd.DataFrame()
 el_results = pd.DataFrame()
@@ -139,6 +139,12 @@ for week_idx, week in enumerate(weeks):
     thermal_bus = views.node(results, "th. Energy")["sequences"]
     electricity_bus = views.node(results, "electricity")["sequences"]
 
+    TES_results = pd.concat([TES_results, TES_storage.iloc[:-1]])
+    battery_results = pd.concat([battery_results, Battery_storage.iloc[:-1]])
+    thdemand_results = pd.concat([thdemand_results, thermal_bus.iloc[:-1]])
+    el_results = pd.concat([el_results, electricity_bus.iloc[:-1]])
+
+
     # Extract investments for storage, HP, and ORC
     storage_investment = extract_investment(results=results, component_label="storage")
     hp_investment = extract_investment(results=results, component_label="HP")
@@ -156,3 +162,7 @@ for week_idx, week in enumerate(weeks):
     print(f"  Battery investment (kW): {battery_investment}, Cost: €{battery_annual_cost:.2f}")
     print(f"  Total Cost: €{yearly_costs:.2f}")
 
+TES_results.to_csv("results/battery/TES_results.csv")
+battery_results.to_csv("results/battery/battery_results.csv")
+thdemand_results.to_csv("results/battery/th_results.csv")
+el_results.to_csv("results/battery/el_results.csv")
