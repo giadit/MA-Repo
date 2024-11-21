@@ -77,3 +77,17 @@ plt.xticks(rotation=45)
 plt.ylabel('th. Energy [kW]')
 plt.legend()  # Adds the custom labels to the legend
 plt.show()
+
+
+# Plotting the data
+plt.figure(figsize=(10, 6))
+plt.plot(date_range, el_bus["to excess"], label="to excess", color='#3269CC', alpha=1)
+plt.xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
+date_format = DateFormatter('%b. %Y')
+plt.gca().xaxis.set_major_formatter(date_format)
+# Adding labels and title
+plt.xticks(rotation=45)
+plt.ylabel('Excess el. Energy [kW]')
+plt.legend()  # Adds the custom labels to the legend
+
+plt.show()
