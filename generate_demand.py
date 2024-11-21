@@ -33,7 +33,7 @@ def read_data(TRY):
         data["Temperature [°C]"] = dt["Wert"]
     return data
 
-def gen_heat_demand(df_temp):
+def gen_heat_demand(df_temp, year):
 
     anzahl_MFH = 35 # 15 WE pro MFH = 525 WE
     beh_wohnfl_proMFH = 1091.9 # m2
@@ -44,8 +44,7 @@ def gen_heat_demand(df_temp):
     annual_el_demand = {"h0_dyn" : 15*anzahl_MFH*2890}
 
 
-    # define holidays for Berlin for 2023
-    year = 2023
+    # define holidays for Berlin for the year
 
     holidays = {
         datetime.date(year, 1, 1): "New year",
@@ -63,7 +62,7 @@ def gen_heat_demand(df_temp):
 
     #create DataFrame for demand
     demand = pd.DataFrame(index=pd.date_range(datetime.datetime(
-        year, 1, 1, 0), periods=8760, freq="h"))
+        year, 1, 1, 0), periods=8760, freq="H"))
 
     #Generate demand for building types
     demand["MFH"] = bdew.HeatBuilding(
@@ -105,6 +104,17 @@ def gen_heat_demand(df_temp):
     return demand
 
 if __name__ == "__main__":
-    df = read_data(TRY=False)
+    df = read_data(TRY=True)
     df_temp = df["Temperature [°C]"]
-    demand = gen_heat_demand(df_temp)
+    demand = gen_heat_demand(df_temp, 2045)
+
+    # Plot demand of building
+    ax = demand["MFH"].plot()
+    ax.set_ylabel("Heat demand in kW")
+    plt.savefig("results/heat_demand_data.png",dpi=1200)
+    plt.show()
+    # Plot demand
+    ax = demand["demand_el"].plot()
+    ax.set_ylabel("Power demand")
+    plt.savefig("results/el_demand_data.png",dpi=1200)
+    plt.show()

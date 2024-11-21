@@ -35,7 +35,7 @@ hour_interval = int(8760/1)
 pv_data = fetch_pv_data(2023)
 df = read_data(TRY=False)
 df_temp = df["Temperature [°C]"]
-demand = gen_heat_demand(df_temp)
+demand = gen_heat_demand(df_temp, 2023)
 grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2, delimiter=";")
 grid_costs[grid_costs["End User Price [EUR/kWh]"] <= 0] = 0
 
