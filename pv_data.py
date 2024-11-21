@@ -7,14 +7,15 @@ from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 
 
 import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
 import pandas as pd
 
-def fetch_pv_data():
+def fetch_pv_data(year):
     location = Location(latitude=52.500,
                         longitude=12.285,tz="Europe/Berlin",
                         altitude=14.5,name="Berlin avg.")
 
-    df_pv = pd.read_csv("data/pvlib_berlin_2023.csv", index_col=0)
+    df_pv = pd.read_csv(f"data/pvlib_berlin_{year}.csv", index_col=0)
     df_pv.index = pd.to_datetime(df_pv.index)
 
    #cec_modules = pvlib.pvsystem.retrieve_sam("cecmod")
@@ -74,14 +75,22 @@ def fetch_pv_data():
     total_power = power_east + power_west
     total_power= total_power.to_frame()
     # Plot total power output
-    #total_power.plot(label='Total Power (East + West)', color='blue')
-    #power_east.plot(label='East Power', color='orange')
-    #plt.figure(figsize=(10, 6))
-    #power_west.plot(label='West Power', color='green')
-    #plt.ylabel('AC Power Output (kW)')
-    #plt.legend()
-    #plt.show()
 
+    plt.figure(figsize=(10, 6))  # Set figure size
+
+    # Use Matplotlib's plot function
+    plt.plot(total_power, label='Total Power (East + West)', color='blue')
+    plt.plot(power_east, label='East Power', color='orange', alpha=0.9)
+    plt.plot(power_west, label='West Power', color='green', alpha=0.9)
+
+    plt.ylabel('AC Power Output (kW)')  # Add axis label
+    plt.xlim(total_power.index.min(), total_power.index.max())
+    plt.ylim(0, float(total_power.max())*1.1)
+    date_format = DateFormatter('%b. %Y')
+    plt.gca().xaxis.set_major_formatter(date_format)
+    plt.xticks(rotation=45)
+    plt.legend()  # Add legend
+    plt.show()  # Display the plot
     #system = PVSystem(surface_tilt=45,surface_azimuth=180,
     #                  module_parameters=module, inverter_parameters=inverter,
     #                  temperature_model_parameters=temperature_parameters,
@@ -96,6 +105,6 @@ def fetch_pv_data():
     return total_power
 
 if __name__ == "__main__":
-    pv_data = fetch_pv_data()
-    pv_data.to_csv("results/pv_data_results.csv")
+    pv_data = fetch_pv_data(2045)
+    #pv_data.to_csv("results/pv_data_results.csv")
     print(pv_data)

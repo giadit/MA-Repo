@@ -22,7 +22,8 @@ storage_output = 2900  # kW
 storage_input = 2900  # kW
 storage_eff = 0.98
 storage_loss = 0.002  # 0.2 %/day
-COP, eta = eff_calc(150, norm = True)
+COP, eta = eff_calc(125, TRY = False)
+
 epc_storage = economics.annuity(capex=3.3,n=40,wacc=0.05)
 epc_HP = economics.annuity(capex=782, n=30,wacc=0.05)
 epc_ORC = economics.annuity(capex=2880,n=30,wacc=0.05)
@@ -31,7 +32,7 @@ epc_ORC = economics.annuity(capex=2880,n=30,wacc=0.05)
 yearly_costs = 0
 hour_interval = int(8760/1)
 # Load Data
-pv_data = fetch_pv_data()
+pv_data = fetch_pv_data(2023)
 df = read_data(TRY=False)
 df_temp = df["Temperature [°C]"]
 demand = gen_heat_demand(df_temp)
