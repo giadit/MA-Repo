@@ -94,7 +94,7 @@ for week_idx, week in enumerate(weeks):
     pv = cmp.Source(label="pv", outputs={bel: flows.Flow(fix=week_pv_data, nominal_value=1)})
 
     HP = cmp.Converter(label="HP", inputs={bel: flows.Flow()},
-                       outputs={th_hp: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_HP))},
+                       outputs={th_hp: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_HP), min = 0.5)},
                        conversion_factors={th_hp: COP["COP"]})
     ORC = cmp.Converter(label="ORC",
                         inputs={th_orc: flows.Flow()},
