@@ -76,21 +76,21 @@ def fetch_pv_data(year):
     total_power= total_power.to_frame()
     # Plot total power output
 
-    plt.figure(figsize=(10, 6))  # Set figure size
+   #plt.figure(figsize=(10, 6))  # Set figure size
 
-    # Use Matplotlib's plot function
-    plt.plot(total_power, label='Total Power (East + West)', color='blue')
-    plt.plot(power_east, label='East Power', color='orange', alpha=0.9)
-    plt.plot(power_west, label='West Power', color='green', alpha=0.9)
+   ## Use Matplotlib's plot function
+   #plt.plot(total_power, label='Total Power (East + West)', color='blue')
+   #plt.plot(power_east, label='East Power', color='orange', alpha=0.9)
+   #plt.plot(power_west, label='West Power', color='green', alpha=0.9)
 
-    plt.ylabel('AC Power Output (kW)')  # Add axis label
-    plt.xlim(total_power.index.min(), total_power.index.max())
-    plt.ylim(0, float(total_power.max())*1.1)
-    date_format = DateFormatter('%b. %Y')
-    plt.gca().xaxis.set_major_formatter(date_format)
-    plt.xticks(rotation=45)
-    plt.legend()  # Add legend
-    plt.show()  # Display the plot
+   #plt.ylabel('AC Power Output (kW)')  # Add axis label
+   #plt.xlim(total_power.index.min(), total_power.index.max())
+   #plt.ylim(0, float(total_power.max())*1.1)
+   #date_format = DateFormatter('%b. %Y')
+   #plt.gca().xaxis.set_major_formatter(date_format)
+   #plt.xticks(rotation=45)
+   #plt.legend()  # Add legend
+   #plt.show()  # Display the plot
     #system = PVSystem(surface_tilt=45,surface_azimuth=180,
     #                  module_parameters=module, inverter_parameters=inverter,
     #                  temperature_model_parameters=temperature_parameters,

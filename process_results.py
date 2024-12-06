@@ -28,7 +28,7 @@ def process_results(results):
     electricity_bus["sequences"].to_csv("results/el_data.csv")
     thermal_bus_orc["sequences"].to_csv(("results/th_data_orc_bus.csv"))
     thermal_bus_hp["sequences"].to_csv(("results/th_data_hp_bus.csv"))
-    thermal_bus_demand["sequences"].to_csv(("results/th_data_demand_bus.csv"))
+    #thermal_bus_demand["sequences"].to_csv(("results/th_data_demand_bus.csv"))
     # plot the time series (sequences) of a specific component/bus
     # How to access individual series:
     #electricity_bus['sequences'][(('electricity_bus', 'demand'), 'flow')]

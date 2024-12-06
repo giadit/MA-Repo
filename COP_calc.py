@@ -33,6 +33,6 @@ def eff_calc(T, TRY):
     return COP, eta
 
 if __name__ == "__main__":
-    COP, eta = eff_calc(125, TRY=False)
+    COP, eta = eff_calc(70, TRY=False)
     print(f"Roundtrip Efficiency: {float(COP.mean())*float(eta.mean())}")
     print(f"COP: {COP.mean()}, Eff. : {eta.mean()}")

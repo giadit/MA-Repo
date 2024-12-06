@@ -92,14 +92,13 @@ def gen_heat_demand(df_temp, year):
    #ax.set_ylabel("Heat demand in kW")
    #plt.savefig("results/heat_demand_data.png",dpi=1200)
    #plt.show()
-   
-   #plt.clf()
-   #
-   ## Plot demand
-   #ax = elec_demand_resampled.plot()
-   #ax.set_ylabel("Power demand")
-   #plt.savefig("results/el_demand_data.png",dpi=1200)
-   #plt.show()
+
+
+    # Plot demand
+    #ax = elec_demand_resampled.plot()
+    #ax.set_ylabel("Power demand")
+    #plt.savefig("results/el_demand_data.png")
+    #plt.show()
    
     return demand
 

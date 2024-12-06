@@ -29,12 +29,12 @@ storage_loss = 0.002 # 0.2 %/day
 
 
 #PV data
-pv_data = fetch_pv_data()
+pv_data = fetch_pv_data(2023)
 
 df = read_data(TRY=False)
 df_temp = df["Temperature [°C]"]
 # th and el demand
-demand = gen_heat_demand(df_temp)
+demand = gen_heat_demand(df_temp, 2023)
 demand.to_csv("results/demand.csv")
 #el prices
 grid_costs = pd.read_csv("data/grid_costs.csv", skiprows=2, delimiter=";")
@@ -49,6 +49,7 @@ th_hp = buses.Bus(label="th. Energy HP")
 th_orc = buses.Bus(label="th. Energy ORC")
 th_sink = buses.Bus(label="th. Energy Demand")
 bel = buses.Bus(label="electricity")
+
 
 #excess component for overproduction of electricity
 excess_bel = cmp.Sink(
@@ -81,11 +82,11 @@ grid = cmp.Source(
 #fixed source for pv
 pv = cmp.Source(
         label="pv",
-        outputs={bel: flows.Flow(fix=pv_data, nominal_value=1)})
+        outputs={bel: flows.Flow(fix=pv_data["p_mp"], nominal_value=1)})
 #adding converter (HeatPump)
 HP = cmp.Converter(
         label = "HP",
-        inputs={bel: flows.Flow(nominal_value=1, max=hp_peak/hp_COP)},
+        inputs={bel: flows.Flow(nominal_value=1, max=hp_peak/hp_COP, min=hp_peak*0.5/hp_COP)},
         outputs={th_hp: flows.Flow()},
         conversion_factors={th_hp: hp_COP}) # technikkatalog
 #adding storage system
@@ -111,11 +112,6 @@ energysys.add(th_hp, th_orc, th_sink,
              grid, pv,
              bridgeHP, bridgeORC,
              ORC, HP, storage)
-#energysys.add(th_hp, th_orc,
-#              bel, excess_bel,
-#              demand_el,
-#              grid, pv,
-#              ORC, HP, storage)
 
 #create optimization
 om = solph.Model(energysys)
@@ -128,4 +124,14 @@ results = solph.processing.results(om)
 total_cost = om.objective()
 print("Total cost of the optimization:", total_cost)
 
-process_results(results)
+custom_storage = views.node(results, "storage")["sequences"]
+thermal_bus_orc = views.node(results, "th. Energy ORC")["sequences"]
+thermal_bus_hp = views.node(results, "th. Energy HP")["sequences"]
+thermal_bus_demand = views.node(results, "th. Energy Demand")["sequences"]
+electricity_bus = views.node(results, "electricity")["sequences"]
+
+custom_storage.to_csv("results/storage_pilot.csv")
+thermal_bus_orc.to_csv("results/ORC_pilot.csv")
+thermal_bus_hp.to_csv("results/HP_pilot.csv")
+thermal_bus_demand.to_csv("results/thdemand_pilot.csv")
+electricity_bus.to_csv("results/el_pilot.csv")

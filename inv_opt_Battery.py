@@ -13,14 +13,14 @@ from generate_demand import read_data, gen_heat_demand
 from pv_data import fetch_pv_data
 from COP_calc import eff_calc
 # SET PARAMS
-#Sole-Wasser WP für dezentrale Heizung
+#Wasser-Wasser WP für dezentrale Heizung
 hp_COP = 5.35 #zw. 4.9 und 5.8
 battery_output = 18000  # kW
 battery_input = 3000  # kW
 battery_eff = 0.95
 battery_loss = 0.001  # 0.1 %/day
 
-epc_battery = economics.annuity(capex=1042,n=20,wacc=0.05)
+epc_battery = economics.annuity(capex=1243.34,n=20,wacc=0.05)
 epc_HP = economics.annuity(capex=416.5, n=20,wacc=0.05) # zw. 452 u 381
 #epc_storage = economics.annuity(capex=3.3,n=40,wacc=0.05)
 

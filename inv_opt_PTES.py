@@ -96,9 +96,11 @@ for week_idx, week in enumerate(weeks):
     HP = cmp.Converter(label="HP", inputs={bel: flows.Flow()},
                        outputs={th_hp: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_HP))},
                        conversion_factors={th_hp: COP["COP"]})
+    ORC = cmp.Converter(label="ORC",
+                        inputs={th_orc: flows.Flow()},
+                        outputs={bel: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_ORC))},
+                        conversion_factors={bel: eta["Efficiency"]})
 
-
-    # Configure storage with rolling initial level
     storage = cmp.GenericStorage(
         #nominal_storage_capacity=storage_cap,
         label="storage",
@@ -110,11 +112,6 @@ for week_idx, week in enumerate(weeks):
         outflow_conversion_factor=storage_eff,
         investment= solph.Investment(ep_costs=epc_storage)
     )
-
-    ORC = cmp.Converter(label="ORC",
-                        inputs={th_orc: flows.Flow()},
-                        outputs={bel: flows.Flow(nominal_value=solph.Investment(ep_costs=epc_ORC))},
-                        conversion_factors={bel: eta["Efficiency"]})
 
     # Add components to energy system
     energysys.add(th_hp, th_orc, th_sink, bel, excess_bel, demand_th, demand_el, grid, pv, bridgeHP, bridgeORC, ORC, HP, storage)
