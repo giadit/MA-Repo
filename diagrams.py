@@ -177,7 +177,7 @@ ax2.plot(date_range, th_bus_demand["from ORC"], 'r-', alpha=0.8, label= "from st
 ax2.plot(date_range, th_bus_demand["from HP"], 'b-', alpha=0.8, label="from HP")
 ax2.set_ylabel('th. Energy [kW]')
 ax2.grid()
-ax2.set_ylim(0,th_bus_demand["from HP"].max()*1.1)
+ax2.set_ylim(0,th_bus_demand["from ORC"].max()*1.1)
 # Set axis limits
 plt.xlim(pd.Timestamp('2023-01-01'), pd.Timestamp('2023-12-31 23:00:00'))
 date_format = DateFormatter("%d/%m/%y")

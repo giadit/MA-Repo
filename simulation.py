@@ -86,7 +86,7 @@ pv = cmp.Source(
 #adding converter (HeatPump)
 HP = cmp.Converter(
         label = "HP",
-        inputs={bel: flows.Flow(nominal_value=1, max=hp_peak/hp_COP, min=hp_peak*0.5/hp_COP)},
+        inputs={bel: flows.Flow(nominal_value=1, max=hp_peak/hp_COP, min=hp_peak*0.35/hp_COP)},
         outputs={th_hp: flows.Flow()},
         conversion_factors={th_hp: hp_COP}) # technikkatalog
 #adding storage system
